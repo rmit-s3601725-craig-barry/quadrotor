@@ -10,7 +10,7 @@
 
 exp = { 
         "env": "hover",
-        "algs": ["sw_scv"]
+        "algs": ["ddpg"]
         }
 
 cem = { 
@@ -34,7 +34,8 @@ ddpg = {
                                 "tau": 0.01
                                 },
         "hidden_dim": 32,
-        "iterations": 10000,
+        # "iterations": 10000,
+        "iterations": 20,
         "mem_len": 1000000,
         "seed": 343,
         "log_interval": 10,

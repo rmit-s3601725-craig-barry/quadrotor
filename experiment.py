@@ -20,14 +20,30 @@ import multiprocessing as mp
 # grab experiment environment and list of algorithms
 env_name = cfg.exp["env"]
 algs = cfg.exp["algs"]
+processes = []
 
 # start training processes
 def main(env_name, algs):
-    processes = []
-    for alg in algs:
-        p = mp.Process(target=make, args=(env_name, alg))
-        processes.append(p)
-        p.start()
+    try :
+        for alg in algs:
+            p = mp.Process(target=make, args=(env_name, alg))
+            processes.append(p)
+            p.start()
+
+        # Wait for processes to finish
+        [p.join() for p in processes];
+
+    #Listens for ctrl+c input
+    except KeyboardInterrupt:
+        terminate(processes);
+
+# stops the training process
+def terminate(processes):
+    print('Terminating all training processes');
+    #Iterate over each process and terminate them
+    for pro in processes:
+        pro.terminate();
+
 
 def make(env_name, alg):
     """

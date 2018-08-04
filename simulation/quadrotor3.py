@@ -75,6 +75,7 @@ class Quadrotor:
         # important physical limits
         self.hov_rpm = sqrt((self.mass*self.g)/self.n_motors/self.kt)
         self.max_rpm = sqrt(1./self.hov_p)*self.hov_rpm
+        print('MAX RPM: ' + str(self.max_rpm));
         self.max_thrust = self.kt*self.max_rpm
 
         # rough velocity and rotation limits. 

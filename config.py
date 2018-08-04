@@ -34,8 +34,7 @@ ddpg = {
                                 "tau": 0.01
                                 },
         "hidden_dim": 32,
-        # "iterations": 10000,
-        "iterations": 20,
+        "iterations": 10000,
         "mem_len": 1000000,
         "seed": 343,
         "log_interval": 10,

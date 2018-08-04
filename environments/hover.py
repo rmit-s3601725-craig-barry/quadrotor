@@ -4,17 +4,20 @@ import simulation.animation as ani
 import matplotlib.pyplot as pl
 import numpy as np
 import random
+import gym
+import gym.spaces as spaces;
+import math;
 from math import pi, sin, cos
-
 
 """
     Environment wrapper for a hover task. The goal of this task is for the agent to climb from [0, 0, 0]^T
     to [0, 0, 1.5]^T, and to remain at that altitude until the the episode terminates at T=15s.
 """
 
-class Environment:
+class Environment(gym.Env):
     def __init__(self):
         
+        self.rendering_initialized = False;
         # environment parameters
         self.goal_xyz = np.array([[0.],
                                 [0.],
@@ -34,8 +37,6 @@ class Environment:
 
         self.t = 0
         self.T = 5
-        self.action_space = 4
-        self.observation_space = 15+self.action_space+15
 
         # simulation parameters
         self.params = cfg.params
@@ -47,6 +48,9 @@ class Environment:
         self.H = int(self.T/self.ctrl_dt)
         self.hov_rpm = self.iris.hov_rpm
         self.trim = [self.hov_rpm, self.hov_rpm,self.hov_rpm, self.hov_rpm]
+
+        self.action_space = spaces.Box(0.0, self.iris.max_rpm, (4,));
+        self.observation_space = spaces.Box(-math.inf, math.inf, (34,));
 
         self.iris.set_state(self.goal_xyz, np.arcsin(self.goal_zeta_sin), self.goal_uvw, self.goal_pqr)
         xyz, zeta, uvw, pqr = self.iris.get_state()
@@ -71,6 +75,7 @@ class Environment:
         self.fig = pl.figure("Hover")
         self.axis3d = self.fig.add_subplot(111, projection='3d')
         self.vis = ani.Visualization(self.iris, 6, quaternion=True)
+        self.rendering_initialized = True;
 
     def reward(self, state, action):
         xyz, zeta, uvw, pqr = state
@@ -145,6 +150,7 @@ class Environment:
         return next_state, reward, done, info
 
     def reset(self):
+        self.rendering_initialized = False;
         self.t = 0.
         self.iris.set_state(self.goal_xyz, np.sin(self.goal_zeta_sin), self.goal_uvw, self.goal_pqr)
         xyz, zeta, uvw, pqr = self.iris.get_state()
@@ -160,7 +166,10 @@ class Environment:
         state = [xyz.T.tolist()[0]+sin_zeta.T.tolist()[0]+cos_zeta.T.tolist()[0]+uvw.T.tolist()[0]+pqr.T.tolist()[0]+a+goals]
         return state
     
-    def render(self):
+    def render(self, mode='human'):
+        if(not self.rendering_initialized):
+            self.init_rendering();
+
         pl.figure("Hover")
         self.axis3d.cla()
         self.vis.draw3d_quat(self.axis3d)
@@ -174,5 +183,8 @@ class Environment:
         self.axis3d.set_title("Time %.3f s" %(self.t))
         pl.pause(0.001)
         pl.draw()
+
+    def _seed(self, seed=None):
+        pass;
 
 
